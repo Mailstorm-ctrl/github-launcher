@@ -22,8 +22,8 @@ Clone reponame on every run and specify the filename "start" as the way to invok
 .\launcher.ps1 -sshkey ~/.ssh/repokey -url https://github.com/organization-name/reponame -startfile "start"
 
 .EXAMPLE
-Clone reponame to users profile only once and pass an argument of "apisecret" "123456789abcdefgh" to a file named runme
-.\launcher.ps1 -sshkey ~/.ssh/repokey -url https://github.com/organization-name/reponame/folder1/folder2 -cache:$true -apisecret 123456789abcdefgh
+Clone reponame to users profile only once and pass an argument of "apisecret 123456789abcdefgh" to a file named runme
+.\launcher.ps1 -sshkey ~/.ssh/repokey -url https://github.com/organization-name/reponame/folder1/folder2 -cache:$true -arguments "-apisecret 123456789abcdefgh"
 #>
 param(
     [Parameter(Mandatory=$true,
@@ -136,9 +136,11 @@ foreach ($runme in $runmes.Name){
     # We take the length of the total filename minus the index position to ensure we get the file extension name
     $extension = $runme.substring($lastindex,$runme.length-$lastindex)
     if($extension -notin $ignore_extensions -and !$executed){
-        if($extension -eq ".ps1"){
-            Start-Process powershell -ArgumentList "-File $destination\$runme $arguments" -Wait
-            $executed = $true
+        switch ($extension){
+            { $_ -eq ".ps1" } {
+                Start-Process powershell -ArgumentList "-File $destination\$runme $arguments" -Wait
+                $executed = $true
+            }
         }
     }
 }
